@@ -7,3 +7,5 @@ export namespace PreciseTrigger {
         remove(key: string): void;
     }
 }
+
+declare var ExecutorCache: PreciseTrigger.ExecutorCache;
