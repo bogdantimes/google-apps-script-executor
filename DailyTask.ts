@@ -22,11 +22,11 @@ class DailyTask extends DefaultTask implements Task {
    * @example dailyTask Bot_AskStatuses 16 30 workDay
    */
   static parse(context: object, taskRaw: string): Task {
-    const regExp = new RegExp(`^(\\w+) (\\w+) (\\d{1,2}) (\\d{1,2}) (${Object.keys(DayChecks).join("|")})$`);
+    const regExp = new RegExp(`^(\\w+) (\\w+) (\\d{1,2}) (\\d{1,2}) (${Object.keys(Context.dayChecks).join("|")})$`);
     const match = taskRaw.trim().match(regExp)
     if (match) {
       const [all, type, funcName, hour, minute, dayCheck] = match
-      return new DailyTask(taskRaw, context[funcName], +hour, +minute, DayChecks[dayCheck])
+      return new DailyTask(taskRaw, context[funcName], +hour, +minute, Context.dayChecks[dayCheck])
     }
     return new InvalidTask(taskRaw)
   }

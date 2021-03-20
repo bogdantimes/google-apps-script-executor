@@ -25,11 +25,11 @@ class HourlyTask extends DefaultTask implements Task {
    * @example hourlyTask Bot_AskStatuses 4 16 19 everyday
    */
   static parse(context: object, taskRaw: string): Task {
-    const regExp = new RegExp(`^(\\w+) (\\w+) (\\d{1,2}) (\\d{1,2}) (\\d{1,2}) (${Object.keys(DayChecks).join("|")})$`);
+    const regExp = new RegExp(`^(\\w+) (\\w+) (\\d{1,2}) (\\d{1,2}) (\\d{1,2}) (${Object.keys(Context.dayChecks).join("|")})$`);
     const match = taskRaw.trim().match(regExp)
     if (match) {
       const [all, type, funcName, hoursInterval, startHour, stopHour, dayCheck] = match
-      return new HourlyTask(taskRaw, context[funcName], +hoursInterval, +startHour, +stopHour, DayChecks[dayCheck])
+      return new HourlyTask(taskRaw, context[funcName], +hoursInterval, +startHour, +stopHour, Context.dayChecks[dayCheck])
     }
     return new InvalidTask(taskRaw)
   }

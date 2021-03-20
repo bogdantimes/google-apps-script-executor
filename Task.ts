@@ -18,11 +18,11 @@ abstract class DefaultTask {
   }
 
   execute(args): any {
-    debugMessage(`Running ${this.getTaskName()}`);
+    Context.debugMsg(`Running ${this.getTaskName()}`);
     try {
       this.func(args);
     } catch (e) {
-      debugMessage(`${this.getTaskName()} FAILED: ${e.message}`);
+      Context.debugMsg(`${this.getTaskName()} FAILED: ${e.message}`);
       console.error(e);
     }
   }
@@ -33,12 +33,6 @@ abstract class DefaultTask {
 
   abstract getTaskName(): string
 }
-
-const DayChecks = {
-  everyday: () => true,
-  weekDay: () => !isWeekEnd(new Date()),
-  lastWeekDayOfMonth: () => isLastWeekDayOfMonth(new Date()),
-};
 
 function ClockTriggerBuilder(name, buildFunction) {
   return {
@@ -54,14 +48,10 @@ function ClockTriggerBuilder(name, buildFunction) {
           },
         });
       } catch (e) {
-        debugMessage('Failed to create trigger "' + name + '. ' + e.message);
+        Context.debugMsg('Failed to create trigger "' + name + '. ' + e.message);
       }
     },
   };
-}
-
-function debugMessage(text) {
-  console.log(`DEBUG_MSG: ${text}`)
 }
 
 interface ExecParams {
@@ -87,7 +77,7 @@ function execute({context, runnable, interval = 2000, attempts = 5}: ExecParams)
     }
   } while (--attempts > 0);
 
-  debugMessage('All attempts failed. Error message: ' + errorMessage);
+  Context.debugMsg('All attempts failed. Error message: ' + errorMessage);
   throw Error(errorMessage);
 }
 
