@@ -1,5 +1,5 @@
 {
-  "name": "@types/precisetrigger",
+  "name": "@types/AppScriptExecutor",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,12 +11,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bogdan-kovalev/PreciseTrigger.git"
+    "url": "git+https://github.com/bogdan-kovalev/AppScriptExecutor.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bogdan-kovalev/PreciseTrigger/issues"
+    "url": "https://github.com/bogdan-kovalev/AppScriptExecutor/issues"
   },
-  "homepage": "https://github.com/bogdan-kovalev/PreciseTrigger#readme"
+  "homepage": "https://github.com/bogdan-kovalev/AppScriptExecutor#readme"
 }
