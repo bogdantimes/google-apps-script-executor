@@ -3,9 +3,9 @@ interface TasksGetter {
 }
 
 interface ExecutorCache {
-  get(key: string, defaultValue?: number | boolean): number | boolean
+  get(key: string, defaultValue?: number | boolean): string | null
 
-  put(key: string, value: number | boolean, expirationInSeconds?: number): void
+  put(key: string, value: string, expirationInSeconds?: number): void
 
   remove(key: string): void;
 }
@@ -16,51 +16,67 @@ type ExecutorConfig = {
   onHealthCheckFailure: () => any
 }
 
-function NewExecutor(config: ExecutorConfig) {
-  const INSTANCE_NAME = 'ExecutorInstance';
-  const HEALTH_CHECK = 'HealthCheck';
-  const INSTANCE_RUNNING = INSTANCE_NAME + '_RUNNING';
-  const INSTANCE_SCHEDULING = 'INSTANCE_SCHEDULING';
-  const PREV_EXEC_TIMESTAMP = 'previous_execution_timestamp';
-  const SEC_IN_TEN_MINS = 600;
+const INSTANCE_NAME = 'ExecutorInstance';
+const HEALTH_CHECK = 'HealthCheck';
+const INSTANCE_RUNNING = INSTANCE_NAME + '_RUNNING';
+const INSTANCE_SCHEDULING = 'INSTANCE_SCHEDULING';
+const PREV_EXEC_TIMESTAMP = 'previous_execution_timestamp';
+const SEC_IN_TEN_MINS = 600;
+
+function _defaultRestart(cfg) {
+  while (cfg.cache.get(INSTANCE_SCHEDULING)) Utilities.sleep(1000);
+  // TODO:bkovalev: delete only executor related triggers
+  ScriptApp.getProjectTriggers().forEach(trigger => ScriptApp.deleteTrigger(trigger));
+  ClockTriggerBuilder(HEALTH_CHECK, builder => builder.everyMinutes(10)).create();
+  ClockTriggerBuilder(INSTANCE_NAME, builder => builder.everyMinutes(1)).create();
+  (Context.runtimeCtx)[INSTANCE_NAME]();
+}
+
+function New(config: ExecutorConfig) {
+  // Init default values
+  const _config = Object.assign({}, {
+    tasksGetter: {get: () => []},
+    cache: CacheService.getScriptCache(),
+    onHealthCheckFailure: () => _defaultRestart(_config)
+  }, config);
 
   function getTasks() {
-    return config.tasksGetter
-        .get()
-        .filter((task: Task): boolean => {
-          if (!task.isValid()) {
-            Context.debugMsg(`Task skipped: invalid parameters: ${JSON.stringify(task)}`);
-            return false
-          }
-          return task.getScheduledTimestamp() != 0
-        });
+    return _config.tasksGetter
+      .get()
+      .filter((task: Task): boolean => {
+        if (!task.isValid()) {
+          Context.debugMsg(`Task skipped: invalid parameters: ${JSON.stringify(task)}`);
+          return false
+        }
+        return task.getScheduledTimestamp() != 0
+      });
   }
 
   (Context.runtimeCtx)[HEALTH_CHECK] = function checkHealth() {
     const hours = new Date().getHours();
     const nightTime = hours >= 0 && hours < 7;
-    if (config.cache.get(INSTANCE_SCHEDULING) || nightTime) return;
+    if (_config.cache.get(INSTANCE_SCHEDULING) || nightTime) return;
 
-    if (!config.cache.get(PREV_EXEC_TIMESTAMP, 0)) {
+    if (!_config.cache.get(PREV_EXEC_TIMESTAMP) || 0) {
       Context.debugMsg('Executor was stopped for more than 5 minutes...');
-      config.onHealthCheckFailure()
+      _config.onHealthCheckFailure()
     }
   };
 
   (Context.runtimeCtx)[INSTANCE_NAME] = args => {
     try {
-      if (config.cache.get(INSTANCE_RUNNING)) {
+      if (_config.cache.get(INSTANCE_RUNNING)) {
         return;
       }
 
-      config.cache.put(INSTANCE_RUNNING, true, SEC_IN_TEN_MINS / 2); // 5 min top
+      _config.cache.put(INSTANCE_RUNNING, "true", SEC_IN_TEN_MINS / 2); // 5 min top
 
       // fetch takes some milliseconds, so we're doing it before saving the timestamp
       const tasks = getTasks();
 
-      const previousExecutionTimestamp = config.cache.get(PREV_EXEC_TIMESTAMP, 0);
+      const previousExecutionTimestamp = +(_config.cache.get(PREV_EXEC_TIMESTAMP) || 0);
       const currentExecutionTimestamp = Date.now();
-      config.cache.put(PREV_EXEC_TIMESTAMP, currentExecutionTimestamp, SEC_IN_TEN_MINS);
+      _config.cache.put(PREV_EXEC_TIMESTAMP, currentExecutionTimestamp.toString(), SEC_IN_TEN_MINS);
 
       tasks.forEach((task: Task) => {
         const scheduledTimestamp = task.getScheduledTimestamp();
@@ -75,7 +91,7 @@ function NewExecutor(config: ExecutorConfig) {
       Context.debugMsg(`Failure in ${INSTANCE_NAME}: ${e.message}`);
       console.error(e);
     } finally {
-      config.cache.remove(INSTANCE_RUNNING);
+      _config.cache.remove(INSTANCE_RUNNING);
     }
   };
 
@@ -92,7 +108,7 @@ function NewExecutor(config: ExecutorConfig) {
       ScriptApp.getProjectTriggers().forEach(trigger => ScriptApp.deleteTrigger(trigger));
     },
     waitWhileScheduling() {
-      while (config.cache.get(INSTANCE_SCHEDULING)) Utilities.sleep(1000);
+      while (_config.cache.get(INSTANCE_SCHEDULING)) Utilities.sleep(1000);
     },
     getTasks(): Task[] {
       return getTasks();
@@ -100,5 +116,11 @@ function NewExecutor(config: ExecutorConfig) {
   };
 }
 
-
-
+function TaskFromString(taskRaw: string): Task {
+  if (taskRaw.trim && taskRaw.trim().startsWith("dailyTask")) {
+    return DailyTask.parse(Context.runtimeCtx, taskRaw)
+  } else if (taskRaw.trim && taskRaw.trim().startsWith("hourlyTask")) {
+    return HourlyTask.parse(Context.runtimeCtx, taskRaw)
+  }
+  return new InvalidTask(taskRaw)
+}
