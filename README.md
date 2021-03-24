@@ -4,11 +4,15 @@ Google Apps Script library that allows executing script functions at exact hour 
 
 # Install
 
-You can also add it as a library.
-https://developers.google.com/apps-script/guides/libraries  
-Library's script ID: **12_fLujy5Nc-hxQWJD4nfFBriN1cU-NLjIuZVyW-NFsAzTdqXUAC8re11**
+You can add it as a library to your Google Apps Script project (see
+how: https://developers.google.com/apps-script/guides/libraries). Library's script
+ID: `12_fLujy5Nc-hxQWJD4nfFBriN1cU-NLjIuZVyW-NFsAzTdqXUAC8re11`.
+
+The other option is to copy the source code to your project and use directly.
 
 # Usage
+
+The examples below are for the case when the library is imported via Apps Script Libraries.
 
 ```ts
 // The functions that have to be executed at particular moments:
@@ -49,6 +53,20 @@ const Executor = AppScriptExecutor.New({
     }
   }
 })
+
+// Start the executor.
+// Executor is running in the background (`ExecutorInstance` and `HealthCheck` triggers are created).
+// This should be done only once.
+function Start() {
+  Executor.restart();
+  console.log(Executor.getTasks().map(t => t.getTaskName()));
+}
+
+// Stop the executor.
+// Should be done only once if the executor needs to be entirely stopped.
+function Stop() {
+  Executor.stop();
+}
 
 ```
 
