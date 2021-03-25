@@ -43,13 +43,13 @@ const Executor = AppScriptExecutor.New({
     get() {
       // Tasks can be fetched from an external resource of your choice, for example Firebase database.
       // Using statically defined tasks as an example.
-      const staticTasks = [
+      const tasks = [
         "hourlyTask RemindToDoAnExcercise 2 8 18 everyday", // Executes `RemindToDoAnExcercise` function every 2 hours from 8 till 18
         "dailyTask SaveAllWork 19 0 weekDay", // Executes `SaveAllWork` function at 19:00 every week day
         "dailyTask CreateMonthlyReport 18 30 lastWeekDayOfMonth", // Executes `CreateMonthlyReport` function at 18:30 every last week day of month
       ];
 
-      return staticTasks.map(AppScriptExecutor.TaskFromString);
+      return tasks.map(AppScriptExecutor.TaskFromString);
     }
   }
 })
@@ -77,7 +77,9 @@ function SendPayment() {
   console.log("my function that sends a payment triggered!");
 }
 
-// Tasks can be instantiated manually as well
+// Tasks can be instantiated manually as well.
+
+// Example using existing class.
 // @ts-ignore
 tasks.push(new AppScriptExecutor.DailyTask(
   "", // Task string, provided when parsed from string.
@@ -86,4 +88,26 @@ tasks.push(new AppScriptExecutor.DailyTask(
   25, // Minute
   () => new Date().getDate() % 2 == 0 // Allow to execute only on even calendar dates
 ))
+
+// Example using completely new implementation on the Task interface.
+// interface Task {
+//   isValid(): boolean
+//   getTaskName(): string
+//   getScheduledTimestamp(): number
+//   execute(args): any
+// }
+tasks.push({
+  isValid() {
+    return true
+  },
+  getTaskName() {
+    return "MyCustomTask that is executed at random moments"
+  },
+  getScheduledTimestamp() {
+    return Math.random() > 0.5 ? Date.now() : 0;
+  },
+  execute(args) {
+    console.log("Executed now! Unexpected huh?");
+  }
+})
 ```
