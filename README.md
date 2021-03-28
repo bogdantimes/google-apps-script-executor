@@ -6,7 +6,7 @@ Google Apps Script library that allows executing script functions at exact hour 
 
 You can add it as a library to your Google Apps Script project (see
 how: https://developers.google.com/apps-script/guides/libraries). Library's script
-ID: `12_fLujy5Nc-hxQWJD4nfFBriN1cU-NLjIuZVyW-NFsAzTdqXUAC8re11`.
+ID: `10BrdB7JWoAmYi4V9b9TuFHz6HimvFGAXNrHEBglEomfej_QZjHr9xi6H`.
 
 The other option is to copy the source code to your project and use directly.
 
