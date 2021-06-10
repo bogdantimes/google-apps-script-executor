@@ -2,7 +2,7 @@
 
 Google Apps Script library that rethinks the approach to time-based triggers. It allows to have tasks stored externally and executed at any moment you need with down to a minute precision (instead of a standart 15 minutes precision).
 
-Advanced features give the ability to define your own types of tasks which go far beyond what is possible with the standard Google Apps Script triggers. 
+Advanced features give the ability to define your own types of tasks which go far beyond what is possible with the standard Google Apps Script time-based triggers. 
 
 # Install
 
