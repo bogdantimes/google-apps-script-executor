@@ -113,3 +113,8 @@ tasks.push({
   }
 })
 ```
+
+# Buy me a coffee
+
+BTC: bc1qw6huxuc20edg66ddj4k6ze9njkcsplkcjllcv3
+Doge: DTtRQJvF9SYF9kwhYnVm6hvXyPzyD4FVfm
