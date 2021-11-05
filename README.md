@@ -113,11 +113,3 @@ tasks.push({
   }
 })
 ```
-
-# Buy me a coffee
-
-BTC: bc1qw6huxuc20edg66ddj4k6ze9njkcsplkcjllcv3
-
-DOGE: DTtRQJvF9SYF9kwhYnVm6hvXyPzyD4FVfm
-
-Mastercard (USD, Monobank): 5375 4188 0074 7289
